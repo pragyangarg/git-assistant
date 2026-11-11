@@ -8,7 +8,7 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "fastmcp<3",
     "gitpython>=3.2.1",
-    "mcp[cli]>=2.3.0",
+    "mcp[cli]<2",
     "pydantic>=2.14.3",
     "pydantic-settings>=2.16.2",
     "pytest>=9.2.0",

@@ -64,6 +64,25 @@ async def get_user_by_email(email: str):
         await db.close()
 
 
+async def get_user_by_auth_subject(auth_subject: str):
+    db = await get_db()
+
+    try:
+        cursor = await db.execute(
+            """
+            SELECT *
+            FROM users
+            WHERE auth_subject = ?
+            """,
+            (auth_subject,)
+        )
+
+        return await cursor.fetchone()
+
+    finally:
+        await db.close()
+
+
 async def add_repository(
     user_id: int,
     name: str,

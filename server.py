@@ -2,7 +2,7 @@ from fastmcp import FastMCP
 from pathlib import Path
 from git import Repo
 import os
-
+from contextlib import asynccontextmanager
 from fastmcp.server.auth.providers.github import GitHubProvider
 import asyncio
 
@@ -13,11 +13,14 @@ from auth.service import get_authenticated_user
 from database.repository import get_user_repositories
 
 
-asyncio.run(init_db())
+#   asyncio.run(init_db())
 
 
 #mcp = FastMCP("PROJECT ASSISTANT")##############
-
+@asynccontextmanager
+async def lifespan(server):
+    await init_db()
+    yield
 
 auth = GitHubProvider(
     client_id=os.environ["GITHUB_CLIENT_ID"],
@@ -28,6 +31,7 @@ auth = GitHubProvider(
 mcp = FastMCP(
     "PROJECT ASSISTANT",
     auth=auth,
+    lifespan=lifespan,
 )
 
 @mcp.tool()

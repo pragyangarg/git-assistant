@@ -1,0 +1,15 @@
+[project]
+name = "mcp-git-assistant"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "fastmcp>=2,<3",
+    "gitpython>=3.2.1",
+    "mcp[cli]>=2.3.0",
+    "pydantic>=2.14.3",
+    "pytest>=9.2.0",
+    "repo>=0.3.0",
+]

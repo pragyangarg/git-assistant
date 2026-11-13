@@ -1,9 +1,9 @@
 import aiosqlite
+import tempfile
 from pathlib import Path
 
-# FastMCP Cloud application filesystem is read-only.
-# /tmp is writable during the running container.
-DB_PATH = Path("/tmp") / "app.db"
+
+DB_PATH = Path(tempfile.gettempdir()) / "app.db"
 
 
 async def get_db():

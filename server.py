@@ -25,11 +25,14 @@ async def lifespan(server):
     await init_db()
     yield
 
-auth = GitHubProvider(
-    client_id=os.environ["GITHUB_CLIENT_ID"],
-    client_secret=os.environ["GITHUB_CLIENT_SECRET"],
-    base_url=os.environ["BASE_URL"],
-)
+auth = None
+
+if os.environ.get("ENVIRONMENT") == "production":
+    auth = GitHubProvider(
+        client_id=os.environ["GITHUB_CLIENT_ID"],
+        client_secret=os.environ["GITHUB_CLIENT_SECRET"],
+        base_url=os.environ["BASE_URL"],
+    )
 
 mcp = FastMCP(
     "PROJECT ASSISTANT",
@@ -164,4 +167,8 @@ async def list_my_repositories():
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(
+        transport="http",
+        host="0.0.0.0",
+        port=8000,
+    )

@@ -12,7 +12,10 @@ from auth.context import get_authenticated_subject
 from auth.service import get_authenticated_user
 from database.repository import get_user_repositories
 
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 #   asyncio.run(init_db())
 
 
@@ -161,4 +164,4 @@ async def list_my_repositories():
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="http", host = "0.0.0.0", port = 8000)

@@ -166,6 +166,27 @@ async def list_my_repositories():
     ]
 
 
+@mcp.tool
+def debug_auth() -> dict:
+    """Debug the current authentication context."""
+    from fastmcp.server.dependencies import get_access_token
+
+    token = get_access_token()
+
+    if token is None:
+        return {
+            "authenticated": False,
+            "message": "No access token available"
+        }
+
+    return {
+        "authenticated": True,
+        "subject": token.subject,
+        "claims": token.claims,
+        "scopes": token.scopes,
+    }
+
+
 if __name__ == "__main__":
     mcp.run(
         transport="http",

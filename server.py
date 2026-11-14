@@ -159,17 +159,16 @@ async def list_my_repositories():
     """
 
     # 1. Get identity from the authentication layer
-    from fastmcp.server.dependencies import get_access_token
+    from auth.context import get_identity_hints
 
     auth_subject = get_authenticated_subject()
-    token = get_access_token()
-    claims = getattr(token, "claims", None) or {}
+    hints = get_identity_hints()
 
     # 2. Convert external identity → internal database user
     user = await get_authenticated_user(
         auth_subject,
-        name=claims.get("name") or claims.get("login"),
-        email=claims.get("email"),
+        name=hints.get("name"),
+        email=hints.get("email"),
     )
 
     # 3. Query only repositories owned by this user
@@ -190,16 +189,28 @@ def debug_auth() -> dict:
     """Debug the current authentication context."""
     from fastmcp.server.dependencies import get_access_token
 
+    from auth.context import get_horizon_actor
+
+    actor = get_horizon_actor()
+
+    if actor:
+        return {
+            "authenticated": True,
+            "source": "horizon-gateway",
+            "actor": actor,
+        }
+
     token = get_access_token()
 
     if token is None:
         return {
             "authenticated": False,
-            "message": "No access token available"
+            "message": "No gateway actor context and no access token available"
         }
 
     return {
         "authenticated": True,
+        "source": "app-token",
         "subject": token.subject,
         "claims": token.claims,
         "scopes": token.scopes,
@@ -207,20 +218,36 @@ def debug_auth() -> dict:
 
 @mcp.tool
 async def debug_github_user() -> dict:
-    """Show the GitHub identity available through authentication."""
+    """Show the identity available through authentication."""
 
     from fastmcp.server.dependencies import get_access_token
+
+    from auth.context import get_horizon_actor
+
+    actor = get_horizon_actor()
+
+    if actor:
+        return {
+            "authenticated": True,
+            "source": "horizon-gateway",
+            "subject": actor["id"],
+            "actor_type": actor["type"],
+            "email": actor["email"],
+            "organization_role": actor["organization_role"],
+            "server_roles": actor["server_roles"],
+        }
 
     token = get_access_token()
 
     if token is None:
         return {
             "authenticated": False,
-            "message": "No access token available",
+            "message": "No gateway actor context and no access token available",
         }
 
     return {
         "authenticated": True,
+        "source": "app-token",
         "subject": token.subject,
         "claims": token.claims,
         "scopes": token.scopes,

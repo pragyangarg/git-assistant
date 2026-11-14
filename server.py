@@ -186,6 +186,27 @@ def debug_auth() -> dict:
         "scopes": token.scopes,
     }
 
+@mcp.tool
+async def debug_github_user() -> dict:
+    """Show the GitHub identity available through authentication."""
+
+    from fastmcp.server.dependencies import get_access_token
+
+    token = get_access_token()
+
+    if token is None:
+        return {
+            "authenticated": False,
+            "message": "No access token available",
+        }
+
+    return {
+        "authenticated": True,
+        "subject": token.subject,
+        "claims": token.claims,
+        "scopes": token.scopes,
+    }
+
 
 if __name__ == "__main__":
     mcp.run(

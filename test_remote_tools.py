@@ -56,6 +56,7 @@ async def main():
         await run("search_code", "search_code", {"query": "FastMCP", "directory": "."})
         await run("read_file", "read_file", {"file_path": "server.py", "start_line": 1, "end_line": 10})
         await run("list_my_repositories", "list_my_repositories", {})
+        await run("list_github_repositories", "list_github_repositories", {})
 
 
 if __name__ == "__main__":

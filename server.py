@@ -194,6 +194,94 @@ async def list_my_repositories():
 
 
 @mcp.tool
+async def list_github_repositories() -> dict:
+    """
+    List the GitHub repositories owned by the server's GitHub account.
+
+    Requires an authenticated identity (gateway or token) and a
+    GITHUB_TOKEN environment variable set on the server holding a
+    GitHub PAT with repo read access. Results are always live —
+    nothing needs to be imported or synced into the database.
+    """
+
+    import httpx
+
+    auth_subject = get_authenticated_subject()
+
+    token = os.environ.get("GITHUB_TOKEN") or None
+
+    if not token:
+        return {
+            "subject": auth_subject,
+            "github_configured": False,
+            "message": (
+                "GITHUB_TOKEN is not set on the server. Create a GitHub "
+                "personal access token (github.com/settings/tokens) and add "
+                "it as GITHUB_TOKEN in the deployment environment."
+            ),
+            "count": 0,
+            "repositories": [],
+        }
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "mcp-git-assistant",
+    }
+
+    repositories: list[dict] = []
+
+    async with httpx.AsyncClient(timeout=30, headers=headers) as client:
+        for page in range(1, 6):  # hard cap: 500 repositories
+            response = await client.get(
+                "https://api.github.com/user/repos",
+                params={
+                    "affiliation": "owner",
+                    "sort": "updated",
+                    "per_page": "100",
+                    "page": str(page),
+                },
+            )
+
+            if response.status_code != 200:
+                return {
+                    "github_configured": True,
+                    "github_authenticated": False,
+                    "status": response.status_code,
+                    "error": response.text[:300],
+                    "count": 0,
+                    "repositories": [],
+                }
+
+            data = response.json()
+
+            repositories.extend({
+                "id": repo["id"],
+                "name": repo["name"],
+                "full_name": repo["full_name"],
+                "private": repo["private"],
+                "language": repo.get("language"),
+                "default_branch": repo.get("default_branch"),
+                "stargazers_count": repo.get("stargazers_count", 0),
+                "fork": repo.get("fork", False),
+                "archived": repo.get("archived", False),
+                "pushed_at": repo.get("pushed_at"),
+                "html_url": repo.get("html_url"),
+            } for repo in data)
+
+            if len(data) < 100:
+                break
+
+    return {
+        "github_authenticated": True,
+        "subject": auth_subject,
+        "count": len(repositories),
+        "repositories": repositories,
+    }
+
+
+@mcp.tool
 def debug_auth() -> dict:
     """Debug the current authentication context."""
     from fastmcp.server.dependencies import get_access_token

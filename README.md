@@ -106,6 +106,7 @@ sequenceDiagram
 - File reading
 - Git commit history
 - Project analysis
+- Live GitHub repository listing via the GitHub API
 - FastMCP Cloud deployment
 - Authentication separated from authorization
 - Database access separated from business logic
@@ -274,6 +275,31 @@ repository WHERE user_id = authenticated user
 ```
 
 This prevents one user from accessing another user's repository simply by supplying another repository ID.
+
+---
+
+# GitHub Integration
+
+`list_my_repositories` lists repositories **registered inside the git-assistant database** — an internal registry that starts empty for each auto-provisioned user and is stored in an ephemeral database on FastMCP Cloud (it does not persist across deployments).
+
+`list_github_repositories` instead returns your **live repositories from GitHub** via the GitHub REST API, always in sync:
+
+```text
+authenticated request
+        ↓
+identity from the FastMCP Gateway actor context (or app-level token)
+        ↓
+GitHub API: GET /user/repos?affiliation=owner
+        ↓
+name, visibility, language, default branch, stars, updated at
+```
+
+It requires a GitHub personal access token available to the server as the `GITHUB_TOKEN` environment variable:
+
+- Create a classic PAT at https://github.com/settings/tokens (scope: `repo`), or a fine-grained PAT with **Contents: read** on your repositories.
+- Set it in the FastMCP Cloud project settings (or in a local `.env`) — never in the repository.
+
+Without `GITHUB_TOKEN`, the tool returns `github_configured: false` with a setup message instead of failing.
 
 ---
 

@@ -9,6 +9,7 @@ dependencies = [
     "diskstore>=0.8.0",
     "fastmcp<3",
     "gitpython>=3.2.1",
+    "httpx>=0.28.1",
     "keyv>=0.4.0",
     "mcp[cli]<2",
     "py-key-value-aio[disk]>=0.3.0",

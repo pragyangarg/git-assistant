@@ -6,9 +6,12 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "aiosqlite>=0.22.1",
+    "diskstore>=0.8.0",
     "fastmcp<3",
     "gitpython>=3.2.1",
+    "keyv>=0.4.0",
     "mcp[cli]<2",
+    "py-key-value-aio[disk]>=0.3.0",
     "pydantic>=2.14.3",
     "pydantic-settings>=2.16.2",
     "pytest>=9.2.0",

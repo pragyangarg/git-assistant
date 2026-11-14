@@ -27,6 +27,7 @@ oauth_provider = OAuth(
     mcp_url=REMOTE_MCP_URL,
     token_storage=store,
     client_name="Claude Desktop Git Assistant",
+    additional_client_metadata={"token_endpoint_auth_method": "client_secret_post"},
 )
 
 remote_client = fastmcp.Client(

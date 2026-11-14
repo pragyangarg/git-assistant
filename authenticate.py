@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 import fastmcp
 from fastmcp.client.auth.oauth import OAuth
-from keyv.aio.stores.disk import DiskStore
+from key_value.aio.stores.disk import DiskStore
 
 load_dotenv()
 
@@ -31,6 +31,7 @@ async def main():
         mcp_url=REMOTE_MCP_URL,
         token_storage=store,
         client_name="Claude Desktop Git Assistant",
+        additional_client_metadata={"token_endpoint_auth_method": "client_secret_post"},
     )
 
     client = fastmcp.Client(

@@ -5,13 +5,13 @@ The obtained tokens will be saved to ~/.mcp-git-assistant/tokens so Claude Deskt
 and MCP Inspector can use them immediately.
 """
 import asyncio
-from pathlib import Path
 import os
 from dotenv import load_dotenv
 
 import fastmcp
 from fastmcp.client.auth.oauth import OAuth
-from key_value.aio.stores.disk import DiskStore
+
+from token_store import TOKEN_DIR, create_token_store
 
 load_dotenv()
 
@@ -19,14 +19,11 @@ REMOTE_MCP_URL = os.environ.get("BASE_URL", "https://retired-lime-bat.fastmcp.ap
 if not REMOTE_MCP_URL.endswith("/mcp"):
     REMOTE_MCP_URL = f"{REMOTE_MCP_URL.rstrip('/')}/mcp"
 
-TOKEN_DIR = Path.home() / ".mcp-git-assistant" / "tokens"
-TOKEN_DIR.mkdir(parents=True, exist_ok=True)
-
 async def main():
     print(f"Connecting to remote MCP server: {REMOTE_MCP_URL}")
     print("If not already authenticated, your default browser will open automatically for GitHub authorization...")
 
-    store = DiskStore(directory=str(TOKEN_DIR))
+    store = create_token_store()
     oauth_provider = OAuth(
         mcp_url=REMOTE_MCP_URL,
         token_storage=store,

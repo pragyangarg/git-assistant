@@ -110,7 +110,18 @@ def git_history(
 ) -> list[dict]:
     """Return recent Git commits."""
 
-    repo = Repo(repository)
+    # The hosted container checks out the repo as a different owner;
+    # mark it safe so git doesn't refuse with "dubious ownership".
+    os.environ["GIT_CONFIG_COUNT"] = "1"
+    os.environ["GIT_CONFIG_KEY_0"] = "safe.directory"
+    os.environ["GIT_CONFIG_VALUE_0"] = "*"
+
+    try:
+        repo = Repo(repository)
+    except Exception as e:
+        return [{
+            "error": f"Unable to open repository at {repository!r}: {e}",
+        }]
 
     commits = []
 
@@ -148,10 +159,18 @@ async def list_my_repositories():
     """
 
     # 1. Get identity from the authentication layer
+    from fastmcp.server.dependencies import get_access_token
+
     auth_subject = get_authenticated_subject()
+    token = get_access_token()
+    claims = getattr(token, "claims", None) or {}
 
     # 2. Convert external identity → internal database user
-    user = await get_authenticated_user(auth_subject)
+    user = await get_authenticated_user(
+        auth_subject,
+        name=claims.get("name") or claims.get("login"),
+        email=claims.get("email"),
+    )
 
     # 3. Query only repositories owned by this user
     repositories = await get_user_repositories(user["id"])

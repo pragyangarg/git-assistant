@@ -174,14 +174,23 @@ async def list_my_repositories():
     # 3. Query only repositories owned by this user
     repositories = await get_user_repositories(user["id"])
 
-    return [
-        {
-            "id": repo["id"],
-            "name": repo["name"],
-            "path": repo["path"],
-        }
-        for repo in repositories
-    ]
+    return {
+        "user": {
+            "id": user["id"],
+            "auth_subject": user["auth_subject"],
+            "name": user["name"],
+            "email": user["email"],
+        },
+        "count": len(repositories),
+        "repositories": [
+            {
+                "id": repo["id"],
+                "name": repo["name"],
+                "path": repo["path"],
+            }
+            for repo in repositories
+        ],
+    }
 
 
 @mcp.tool

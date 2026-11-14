@@ -1,9 +1,8 @@
 import aiosqlite
-import tempfile
 from pathlib import Path
 
 
-DB_PATH = Path(tempfile.gettempdir()) / "app.db"
+DB_PATH = Path(__file__).resolve().parent.parent / "data" / "app.db"
 
 
 async def get_db():
